@@ -244,12 +244,6 @@ with col_audio:
             audio_bytes = audio_bytes.read()
             st.session_state.recorder_id += 1
 
-
-    # Fallback to the custom component if somehow still available:
-    elif _have_custom_recorder:
-        audio_bytes = audio_recorder(
-            text="", pause_threshold=60.0, key=st.session_state.recorder_key
-        )
     else:
         st.warning("Audio input is not available in this environment.")
         audio_bytes = None
@@ -268,7 +262,6 @@ if audio_bytes:
     result = whisper_model.transcribe(audio_path)
     transcript = result.get("text", "")
     st.session_state["last_voice_input"] = transcript
-    st.session_state.recorder_key = str(uuid.uuid4())
 
     #erase audio data. 
     if os.path.exists(audio_path):
