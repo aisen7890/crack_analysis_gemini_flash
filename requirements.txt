@@ -1,14 +1,25 @@
+# Provide SQLite ≥3.35.0 for ChromaDB
 pysqlite3-binary>=0.5.4
+
+# Streamlit core
 streamlit>=1.32.0
+
+# Gemini API client
 google-generativeai>=0.3.2
+
+# Image handling & RAG
 Pillow>=10.2.0
-python-dotenv>=1.0.1
 chromadb>=0.4.22
-pdfminer.six>=20231228
-gTTS>=2.5.1
-git+https://github.com/Joooohan/audio-recorder-streamlit.git@main#egg=audio-recorder-streamlit
-openai-whisper>=20231117
 sentence-transformers>=2.5.1
+
+# PDF text extraction
+pdfminer.six>=20231228
+
+# Text-to-speech
+gTTS>=2.5.1
+
+# Whisper (will pull in torch; you can also pin these)
+openai-whisper>=20231117
 torch>=2.0.1
 torchvision>=0.15.2
 torchaudio>=2.0.2
