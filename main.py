@@ -306,9 +306,6 @@ if st.sidebar.button("Add PDF"):
     else:
         st.sidebar.warning("Please select a PDF first.")
 
-col = initialize_db()
-count = col.count()
-ct = st.sidebar.info(f"Total docs in DB: {count}")
 
 # Clear DB with confirmation
 st.sidebar.markdown("---")
