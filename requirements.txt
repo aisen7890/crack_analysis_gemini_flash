@@ -1,3 +1,4 @@
+pysqlite3-binary>=0.0.1
 streamlit>=1.32.0
 google-generativeai>=0.3.2
 Pillow>=10.2.0
@@ -8,7 +9,6 @@ gTTS>=2.5.1
 git+https://github.com/Joooohan/audio-recorder-streamlit.git@main#egg=audio-recorder-streamlit
 openai-whisper>=20231117
 sentence-transformers>=2.5.1
-# (optional) force a CPU-only torch build from PyPI
 torch>=2.0.1
 torchvision>=0.15.2
 torchaudio>=2.0.2
