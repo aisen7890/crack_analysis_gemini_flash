@@ -404,9 +404,10 @@ if st.button("Clear Chat"):
 
 
 
-
 try:
-    tts = gTTS(text=st.session_state.response, lang='en')
+    txt =st.session_state.response
+    lang = detect(txt)
+    tts = gTTS(text=txt, lang=lang)
     with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_audio:
         tts.save(tmp_audio.name)
         audio_path = tmp_audio.name
@@ -414,6 +415,8 @@ try:
     st.session_state.response = None
 except:
     print()
+
+
 
 st.session_state["pending_image"] = None
 
