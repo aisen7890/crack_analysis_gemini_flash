@@ -249,37 +249,35 @@ with col_audio:
         audio_bytes = None
     
     
-# If audio is recorded, transcribe and use as prompt; else use typed prompt
-user_prompt = None
+# — revised audio buffering & transcription —
+# 1. read raw bytes into a “pending_audio” slot
+# 2. if pending, transcribe once and then pop it
+# 3. never clear last_voice_input unless you explicitly want to discard
 
-if audio_bytes:
+# Step 1: capture new audio into session state
+if audio_bytes is not None:
+    st.session_state["pending_audio"] = audio_bytes
+
+# Step 2: if we have pending audio, transcribe it exactly once
+if st.session_state.get("pending_audio"):
+    data = st.session_state.pop("pending_audio")
+    # write to temp file & transcribe
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        f.write(audio_bytes)
-        f.flush()
-        f.close()
+        f.write(data)
         audio_path = f.name
     whisper_model = whisper.load_model("base")
     result = whisper_model.transcribe(audio_path)
-    transcript = result.get("text", "")
-    st.session_state["last_voice_input"] = transcript
+    st.session_state["last_voice_input"] = result.get("text", "")
+    os.remove(audio_path)
+    # bump recorder key so widget resets
+    st.session_state.recorder_key = str(uuid.uuid4())
 
-    #erase audio data. 
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
-    audio_bytes = None
-
-
-# Use the most recent input: prefer typed text if present, else voice
+# Step 3: determine the user_prompt
 if typed_prompt:
     user_prompt = typed_prompt
-    audio_bytes = None
-    typed_prompt=''
 elif st.session_state.get("last_voice_input"):
-    typed_prompt=''
     user_prompt = st.session_state["last_voice_input"]
 else:
-    typed_prompt=''
-    audio_bytes = None
     user_prompt = None
 
 # Display chat history
