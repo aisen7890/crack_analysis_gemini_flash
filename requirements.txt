@@ -5,12 +5,10 @@ python-dotenv>=1.0.1
 chromadb>=0.4.22
 pdfminer.six>=20231228
 gTTS>=2.5.1
-audio-recorder-streamlit>=0.1.6
+git+https://github.com/Joooohan/audio-recorder-streamlit.git@main#egg=audio-recorder-streamlit
 openai-whisper>=20231117
 sentence-transformers>=2.5.1
-
-# PyTorch + CUDA11.8
---extra-index-url https://download.pytorch.org/whl/cu118
-torch==2.6.0+cu118
-torchvision==0.21.0+cu118
-torchaudio==2.6.0+cu118
+# (optional) force a CPU-only torch build from PyPI
+torch>=2.0.1
+torchvision>=0.15.2
+torchaudio>=2.0.2
