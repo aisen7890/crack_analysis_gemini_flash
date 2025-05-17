@@ -149,23 +149,32 @@ if 'save_to_reports' not in st.session_state:
 
 def get_gemini_response(prompt, image=None):
     try:
+
+        # 1. 이전 대화 내역을 먼저 contents에 추가
+        contents = []
+        for msg in st.session_state.chat_history:
+            # 역할(role)과 내용을 구분하기 위해 "User: …", "Assistant: …" 형태로 삽입
+            role_prefix = "User" if msg["role"] == "user" else "Assistant"
+            contents.append({"text": f"{role_prefix}: {msg['content']}"})
+        
+        # 2. 현재 유저 질문 추가
+        contents.append({"text": f"User: {prompt}"})
+
+
         if image:
-            # Convert image to bytes
-            img_byte_arr = io.BytesIO()
-            image.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            
-            # Create the content parts
-            content_parts = [
-                {"text": prompt},
-                {"inline_data": {"mime_type": "image/png", "data": base64.b64encode(img_byte_arr).decode()}}
-            ]
-        else:
-            content_parts = [{"text": prompt}]
+            img_buf = io.BytesIO()
+            image.save(img_buf, format="PNG")
+            img_data = base64.b64encode(img_buf.getvalue()).decode()
+            contents.append({
+                "inline_data": {
+                    "mime_type": "image/png",
+                    "data": img_data
+                }
+            })
 
         # Generate response
         response = model.generate_content(
-            contents=content_parts,
+            contents=contents,
             generation_config={
                 "temperature": 0.7,
                 "top_p": 0.8,
@@ -178,6 +187,7 @@ def get_gemini_response(prompt, image=None):
     except Exception as e:
         st.error(f"Error: {str(e)}")
         return None
+        
 
 def autoplay_audio(audio_file_path):
     with open(audio_file_path, "rb") as f:
