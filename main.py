@@ -83,25 +83,21 @@ def get_client():
         client = chromadb.PersistentClient(path=str(CHROMA_PATH))
     return client
 
-def clear_chromadb() -> bool:
+def clear_chromadb_documents():
     try:
-        global client
-        if client is not None:
-            try:
-                client.reset()
-            except:
-                pass
-            client = None
-            gc.collect()
-        if CHROMA_PATH.exists():
-            shutil.rmtree(CHROMA_PATH, onerror=_on_rm_error)
-            st.sidebar.success("Knowledge base cleared.")
+        col = initialize_db()
+        # Get all IDs in the collection
+        all_ids = col.get(ids=None)["ids"]
+        if all_ids:
+            col.delete(ids=all_ids)
+            st.sidebar.success("All documents in the knowledge base have been deleted.")
         else:
-            st.sidebar.info("Knowledge base already empty.")
+            st.sidebar.info("No documents to delete.")
         return True
     except Exception as e:
-        st.sidebar.error(f"Error clearing ChromaDB: {e}")
+        st.sidebar.error(f"Error deleting documents from ChromaDB: {e}")
         return False
+    
 
 def initialize_db():
     return get_client().get_or_create_collection(
@@ -338,7 +334,8 @@ else:
 # Clear KB with confirmation
 st.sidebar.markdown("---")
 if st.sidebar.button("Clear DB", type='secondary'):
-    clear_chromadb()
+    clear_chromadb_documents()
+    st.rerun()
 
 # --- Modify chat input logic to use RAG ---
 if user_prompt:
