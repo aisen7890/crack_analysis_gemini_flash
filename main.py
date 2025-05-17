@@ -413,6 +413,7 @@ try:
 except:
     print()
 
+st.session_state["pending_image"] = None
 
 
 
