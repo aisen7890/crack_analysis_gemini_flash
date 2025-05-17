@@ -69,10 +69,6 @@ client = None
 REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
 
-def _on_rm_error(func, path, exc_info):
-    os.chmod(path, stat.S_IWRITE)
-    func(path)
-
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
