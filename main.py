@@ -338,8 +338,7 @@ else:
 # Clear KB with confirmation
 st.sidebar.markdown("---")
 if st.sidebar.button("Clear DB", type='secondary'):
-    if st.sidebar.button("Confirm Clear", key='confirm_clear'):
-        clear_chromadb()
+    clear_chromadb()
 
 # --- Modify chat input logic to use RAG ---
 if user_prompt:
