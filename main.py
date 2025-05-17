@@ -269,13 +269,6 @@ if audio_bytes:
     audio_bytes = None
 
 
-
-
-
-
-else:
-    st.session_state["last_voice_input"] = None
-
 # Use the most recent input: prefer typed text if present, else voice
 if typed_prompt:
     user_prompt = typed_prompt
