@@ -52,6 +52,11 @@ if not api_key:
     st.stop()
 
 
+# Cloud에서도 쓰기 보장되는 임시 디렉터리 설정
+CACHE_DIR = Path(tempfile.gettempdir()) / "my_app"
+CACHE_DIR.mkdir(exist_ok=True)
+HISTORY_PATH = CACHE_DIR / "conversation_history.json"
+
 
 old_genai.configure(api_key=api_key)
 
@@ -125,13 +130,14 @@ def load_conversation_history():
             st.error(f"Error loading conversation history: {e}")
     return []
 
-def save_conversation_history(history):
+def save_conversation_history():
     try:
-        CONVERSATION_HISTORY_PATH.write_text(
-            json.dumps(history, ensure_ascii=False, indent=2), encoding='utf-8'
+        HISTORY_PATH.write_text(
+            json.dumps(st.session_state.chat_history, ensure_ascii=False, indent=2),
+            encoding='utf-8'
         )
     except Exception as e:
-        st.error(f"Error saving conversation history: {e}")
+        st.error(f"History save failed: {e}")
 
 def image_to_base64(image):
     buf = io.BytesIO()
@@ -140,7 +146,14 @@ def image_to_base64(image):
 
 # Initialize session state for chat history
 if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = load_conversation_history()
+    if HISTORY_PATH.exists():
+        try:
+            st.session_state.chat_history = json.loads(HISTORY_PATH.read_text(encoding='utf-8'))
+        except Exception:
+            st.session_state.chat_history = []
+    else:
+        st.session_state.chat_history = []
+        
 
 # At the top, after session state initialization
 if 'save_to_reports' not in st.session_state:
