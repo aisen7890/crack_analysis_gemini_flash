@@ -66,7 +66,7 @@ CONVERSATION_HISTORY_PATH = Path("./conversation_history.json")
 CHROMA_PATH = Path("./chroma_db").resolve()
 
 # ChromaDB and RAG functions
-client = None
+client = chromadb.Client()
 
 REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
@@ -77,9 +77,6 @@ ef = embedding_functions.SentenceTransformerEmbeddingFunction(
 )
 
 def get_client():
-    global client
-    if client is None:
-        client = chromadb.PersistentClient(path=str(CHROMA_PATH))
     return client
 
 
@@ -345,8 +342,13 @@ else:
 # Clear KB with confirmation
 st.sidebar.markdown("---")
 if st.sidebar.button("Clear Knowledge Base", type="secondary"):
-    clear_chromadb_documents()
-    st.rerun()
+    col = initialize_db()
+    ids = col.get(ids=None)["ids"]
+    if ids:
+        col.delete(ids=ids)
+    st.sidebar.success("Cleared")
+    
+
 
 
 # --- Modify chat input logic to use RAG ---
