@@ -63,7 +63,6 @@ st.set_page_config(
 )
 
 CONVERSATION_HISTORY_PATH = Path("./conversation_history.json")
-CHROMA_PATH = Path("./chroma_db").resolve()
 
 # ChromaDB and RAG functions
 client = chromadb.Client()
@@ -314,15 +313,9 @@ if st.sidebar.button("Add PDF"):
     else:
         st.sidebar.warning("Please select a PDF first.")
 
-# Show stats
-if CHROMA_PATH.exists():
-    try:
-        col = initialize_db()
-        st.sidebar.info(f"Total docs in KB: {col.count()}")
-    except Exception as e:
-        st.sidebar.error(f"Error reading KB: {e}")
-else:
-    st.sidebar.info("Total docs in KB: 0")
+col = initialize_db()
+count = col.count()
+st.sidebar.info(f"Total docs in KB: {count}")
 
 # Clear KB with confirmation
 st.sidebar.markdown("---")
