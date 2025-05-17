@@ -1,3 +1,15 @@
+# ------------------------------------------
+# Monkey-patch sqlite3 to use pysqlite3-binary
+# ------------------------------------------
+try:
+    import pysqlite3 as sqlite3_alt
+    import sys
+    # Replace the built-in sqlite3 with pysqlite3
+    sys.modules['sqlite3'] = sqlite3_alt
+except ImportError:
+    # If pysqlite3-binary isn't installed, fall back to system sqlite3
+    pass
+
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
