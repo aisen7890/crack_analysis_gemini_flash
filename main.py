@@ -325,6 +325,67 @@ if st.sidebar.button("Clear DB", type="secondary"):
 
 
 
+
+
+
+
+
+# --- Sidebar: Saved Reports Management ---
+st.sidebar.markdown("---")
+st.sidebar.header("📂 Saved Reports")
+
+# reports 폴더 파일 리스트
+report_files = sorted(REPORTS_DIR.iterdir())
+if report_files:
+    for file in report_files:
+        with open(file, "rb") as f:
+            st.sidebar.download_button(
+                label=f"Download {file.name}",
+                data=f,
+                file_name=file.name,
+                mime="application/octet-stream",
+            )
+else:
+    st.sidebar.info("No reports available.")
+
+
+# --- Sidebar: Clear Saved Reports ---
+if st.sidebar.button("Clear All Reports", type="secondary"):
+    # Delete every file in the reports folder
+    report_files = list(REPORTS_DIR.iterdir())
+    if report_files:
+        for f in report_files:
+            try:
+                f.unlink()
+            except Exception as e:
+                st.sidebar.error(f"Failed to delete {f.name}: {e}")
+        st.sidebar.success("All report files have been deleted.")
+    else:
+        st.sidebar.info("No reports to delete.")
+    # Refresh the app so download list disappears immediately
+    st.rerun()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # --- Modify chat input logic to use RAG ---
 if user_prompt:
     # If user asks to save to reports, set the flag
