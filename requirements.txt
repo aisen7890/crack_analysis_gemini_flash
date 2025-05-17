@@ -17,6 +17,7 @@ pdfminer.six>=20231228
 
 # Text-to-speech
 gTTS>=2.5.1
+langdetect
 
 # Whisper (will pull in torch; you can also pin these)
 openai-whisper>=20231117
