@@ -50,7 +50,7 @@ if not api_key:
 
 
 
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=api_key)
 
 # Initialize the model
 model = genai.GenerativeModel('gemini-1.5-flash')
