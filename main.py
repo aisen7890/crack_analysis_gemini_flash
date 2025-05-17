@@ -48,7 +48,9 @@ if not api_key:
     st.error("❌ GOOGLE_API_KEY가 설정되어 있지 않습니다.")
     st.stop()
 
-genai.configure(api_key=api_key)
+
+
+genai.configure(api_key=GOOGLE_API_KEY)
 
 # Initialize the model
 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -61,19 +63,14 @@ st.set_page_config(
 )
 
 CONVERSATION_HISTORY_PATH = Path("./conversation_history.json")
-
-
-
 CHROMA_PATH = Path("./chroma_db").resolve()
-
-
-
 
 # ChromaDB and RAG functions
 client = None
 
 REPORTS_DIR = Path("./reports")
 REPORTS_DIR.mkdir(exist_ok=True)
+
 
 ef = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
@@ -85,21 +82,6 @@ def get_client():
         client = chromadb.PersistentClient(path=str(CHROMA_PATH))
     return client
 
-def clear_chromadb_documents():
-    try:
-        col = initialize_db()
-        # Get all IDs in the collection
-        all_ids = col.get(ids=None)["ids"]
-        if all_ids:
-            col.delete(ids=all_ids)
-            st.sidebar.success("All documents in the knowledge base have been deleted.")
-        else:
-            st.sidebar.info("No documents to delete.")
-        return True
-    except Exception as e:
-        st.sidebar.error(f"Error deleting documents from ChromaDB: {e}")
-        return False
-    
 
 def initialize_db():
     return get_client().get_or_create_collection(
@@ -209,6 +191,21 @@ def autoplay_audio(audio_file_path):
     '''
     st.markdown(md, unsafe_allow_html=True)
 
+def clear_chromadb_documents():
+    try:
+        col = initialize_db()
+        # Get all IDs in the collection
+        all_ids = col.get(ids=None)["ids"]
+        if all_ids:
+            col.delete(ids=all_ids)
+            st.sidebar.success("All documents in the knowledge base have been deleted.")
+        else:
+            st.sidebar.info("No documents to delete.")
+        return True
+    except Exception as e:
+        st.sidebar.error(f"Error deleting documents from ChromaDB: {e}")
+        return False
+    
 # App title and description
 st.title("🤖 Analyze Concrete Crack using AI")
 st.markdown("""
@@ -274,6 +271,7 @@ with col_audio:
     else:
         st.warning("Audio input is not available in this environment.")
         audio_bytes = None
+    
     
 # If audio is recorded, transcribe and use as prompt; else use typed prompt
 user_prompt = None
@@ -346,9 +344,10 @@ else:
 
 # Clear KB with confirmation
 st.sidebar.markdown("---")
-if st.sidebar.button("Clear DB", type='secondary'):
+if st.sidebar.button("Clear Knowledge Base", type="secondary"):
     clear_chromadb_documents()
     st.rerun()
+
 
 # --- Modify chat input logic to use RAG ---
 if user_prompt:
@@ -433,3 +432,16 @@ if st.button("Clear Chat"):
     if CONVERSATION_HISTORY_PATH.exists():
         CONVERSATION_HISTORY_PATH.unlink()
     st.rerun()
+
+
+
+
+
+
+
+
+
+
+
+
+
