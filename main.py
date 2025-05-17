@@ -48,8 +48,7 @@ if not api_key:
     st.error("❌ GOOGLE_API_KEY가 설정되어 있지 않습니다.")
     st.stop()
 
-if "recorder_id" not in st.session_state:
-    st.session_state["recorder_id"] = 0
+
 
 genai.configure(api_key=api_key)
 
@@ -199,6 +198,8 @@ Upload an image or type your message to start the conversation!
 st.header("Image Input")
 col1, col2 = st.columns(2)
 
+if "recorder_key" not in st.session_state:
+    st.session_state.recorder_key = str(uuid.uuid4())
 
 with col1:
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -236,48 +237,62 @@ with col_audio:
     # Try the built-in widget first:
     if hasattr(st, "audio_input"):
         audio_bytes = st.audio_input("🎤 Record your voice", label_visibility="collapsed",
-        key=f"recorder-{st.session_state.recorder_id}")
+        key=st.session_state.recorder_key)
 
         
         # `.audio_input` returns a BytesIO-like object
         if audio_bytes is not None:
             audio_bytes = audio_bytes.read()
-            st.session_state.recorder_id += 1
 
+    # Fallback to the custom component if somehow still available:
+    elif _have_custom_recorder:
+        audio_bytes = audio_recorder(
+            text="", pause_threshold=60.0, key=st.session_state.recorder_key
+        )
     else:
         st.warning("Audio input is not available in this environment.")
         audio_bytes = None
     
     
-# — revised audio buffering & transcription —
-# 1. read raw bytes into a “pending_audio” slot
-# 2. if pending, transcribe once and then pop it
-# 3. never clear last_voice_input unless you explicitly want to discard
+# If audio is recorded, transcribe and use as prompt; else use typed prompt
+user_prompt = None
 
-# Step 1: capture new audio into session state
-if audio_bytes is not None:
-    st.session_state["pending_audio"] = audio_bytes
-
-# Step 2: if we have pending audio, transcribe it exactly once
-if st.session_state.get("pending_audio"):
-    data = st.session_state.pop("pending_audio")
-    # write to temp file & transcribe
+if audio_bytes:
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        f.write(data)
+        f.write(audio_bytes)
+        f.flush()
+        f.close()
         audio_path = f.name
     whisper_model = whisper.load_model("base")
     result = whisper_model.transcribe(audio_path)
-    st.session_state["last_voice_input"] = result.get("text", "")
-    os.remove(audio_path)
-    # bump recorder key so widget resets
+    transcript = result.get("text", "")
+    st.session_state["last_voice_input"] = transcript
     st.session_state.recorder_key = str(uuid.uuid4())
 
-# Step 3: determine the user_prompt
+    #erase audio data. 
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
+    audio_bytes = None
+
+
+
+
+
+
+else:
+    st.session_state["last_voice_input"] = None
+
+# Use the most recent input: prefer typed text if present, else voice
 if typed_prompt:
     user_prompt = typed_prompt
+    audio_bytes = None
+    typed_prompt=''
 elif st.session_state.get("last_voice_input"):
+    typed_prompt=''
     user_prompt = st.session_state["last_voice_input"]
 else:
+    typed_prompt=''
+    audio_bytes = None
     user_prompt = None
 
 # Display chat history
@@ -297,8 +312,10 @@ if st.sidebar.button("Add PDF"):
         st.sidebar.success(f"PDF '{pdf_file.name}' added.")
     else:
         st.sidebar.warning("Please select a PDF first.")
-col = initialize_db()
 
+col = initialize_db()
+count = col.count()
+ct = st.sidebar.info(f"Total docs in DB: {count}")
 
 # Clear DB with confirmation
 st.sidebar.markdown("---")
@@ -308,10 +325,10 @@ if st.sidebar.button("Clear DB", type="secondary"):
     if ids:
         col.delete(ids=ids)
     st.sidebar.success("Cleared")
+    count = col.count()
+    ct = st.sidebar.info(f"Total docs in DB: {count}")
 
 
-count = col.count()
-st.sidebar.info(f"Total docs in DB: {count}")
 
 
 # --- Modify chat input logic to use RAG ---
@@ -397,7 +414,6 @@ if st.button("Clear Chat"):
     if CONVERSATION_HISTORY_PATH.exists():
         CONVERSATION_HISTORY_PATH.unlink()
     st.rerun()
-
 
 
 
