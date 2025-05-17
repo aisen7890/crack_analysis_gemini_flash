@@ -33,9 +33,10 @@ from gtts import gTTS
 import whisper
 import uuid
 
-from google import genai as new_genai
-import asyncio
+# from google import genai as new_genai
+# import asyncio
 
+from langdetect import detect
 
 # Configure the Gemini API
 if "GOOGLE_API_KEY" in st.secrets:
