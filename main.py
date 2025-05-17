@@ -254,12 +254,23 @@ col_chat, col_audio = st.columns([3, 1])
 with col_chat:
     typed_prompt = st.chat_input("Enter text here")
 with col_audio:
-    # Use Streamlit's built-in audio_input
-    audio_file = st.audio_input("🎤 Record your voice",  label_visibility="collapsed", key=st.session_state.recorder_key)
-    
-    if audio_file is not None:
-        audio_bytes = audio_file.read()
+    # Try the built-in widget first:
+    if hasattr(st, "audio_input"):
+        audio_bytes = st.audio_input("🎤 Record your voice", label_visibility="collapsed",
+        key=st.session_state.recorder_key)
+
+        
+        # `.audio_input` returns a BytesIO-like object
+        if audio_bytes is not None:
+            audio_bytes = audio_bytes.read()
+
+    # Fallback to the custom component if somehow still available:
+    elif _have_custom_recorder:
+        audio_bytes = audio_recorder(
+            text="", pause_threshold=60.0, key=st.session_state.recorder_key
+        )
     else:
+        st.warning("Audio input is not available in this environment.")
         audio_bytes = None
     
 # If audio is recorded, transcribe and use as prompt; else use typed prompt
