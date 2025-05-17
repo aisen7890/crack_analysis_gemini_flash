@@ -360,6 +360,7 @@ if user_prompt:
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             response = get_gemini_response(full_prompt, image)
+            st.session_state.response = response
 
 
         
