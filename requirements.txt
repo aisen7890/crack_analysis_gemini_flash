@@ -7,6 +7,7 @@ streamlit>=1.32.0
 # Gemini API client
 google-generativeai>=0.3.2
 google-genai
+wave
 
 # Image handling & RAG
 Pillow>=10.2.0
