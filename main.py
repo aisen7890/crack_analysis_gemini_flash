@@ -64,10 +64,8 @@ CONVERSATION_HISTORY_PATH = Path("./conversation_history.json")
 
 
 
-# Use Streamlit's temporary directory for ChromaDB
-tmp = Path(tempfile.gettempdir())           # usually “/tmp”
-CHROMA_PATH = tmp / "chroma_db"
-CHROMA_PATH.mkdir(parents=True, exist_ok=True)
+CHROMA_PATH = Path("./chroma_db").resolve()
+
 
 
 
