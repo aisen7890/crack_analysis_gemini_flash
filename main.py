@@ -56,7 +56,7 @@ if not api_key:
 old_genai.configure(api_key=api_key)
 
 # Initialize the model
-model = old_genai.GenerativeModel('gemini-1.5-flash')
+model = old_genai.GenerativeModel('gemini-2.5-flash-preview-04-17')
 
 # Set page config
 st.set_page_config(
