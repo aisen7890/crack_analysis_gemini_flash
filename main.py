@@ -325,7 +325,6 @@ if st.sidebar.button("Clear DB", type="secondary"):
     if ids:
         col.delete(ids=ids)
     st.sidebar.success("Cleared")
-    st.rerun()
     
 
 
