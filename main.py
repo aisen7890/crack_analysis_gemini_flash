@@ -324,7 +324,7 @@ if st.sidebar.button("Clear Knowledge Base", type="secondary"):
     ids = col.get(ids=None)["ids"]
     if ids:
         col.delete(ids=ids)
-    st.sidebar.success("Cleared")
+    st.success("Cleared")
     st.rerun()
     
 
