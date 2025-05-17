@@ -48,7 +48,8 @@ if not api_key:
     st.error("❌ GOOGLE_API_KEY가 설정되어 있지 않습니다.")
     st.stop()
 
-
+if "recorder_id" not in st.session_state:
+    st.session_state["recorder_id"] = 0
 
 genai.configure(api_key=api_key)
 
@@ -198,8 +199,6 @@ Upload an image or type your message to start the conversation!
 st.header("Image Input")
 col1, col2 = st.columns(2)
 
-if "recorder_key" not in st.session_state:
-    st.session_state.recorder_key = str(uuid.uuid4())
 
 with col1:
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -237,12 +236,14 @@ with col_audio:
     # Try the built-in widget first:
     if hasattr(st, "audio_input"):
         audio_bytes = st.audio_input("🎤 Record your voice", label_visibility="collapsed",
-        key=st.session_state.recorder_key)
+        key=f"recorder-{st.session_state.recorder_id}")
 
         
         # `.audio_input` returns a BytesIO-like object
         if audio_bytes is not None:
             audio_bytes = audio_bytes.read()
+            st.session_state.recorder_id += 1
+
 
     # Fallback to the custom component if somehow still available:
     elif _have_custom_recorder:
