@@ -315,9 +315,9 @@ if st.sidebar.button("Add PDF"):
 
 col = initialize_db()
 count = col.count()
-st.sidebar.info(f"Total docs in KB: {count}")
+st.sidebar.info(f"Total docs in DB: {count}")
 
-# Clear KB with confirmation
+# Clear DB with confirmation
 st.sidebar.markdown("---")
 if st.sidebar.button("Clear DB", type="secondary"):
     col = initialize_db()
