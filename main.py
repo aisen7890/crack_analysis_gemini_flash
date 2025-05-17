@@ -334,8 +334,22 @@ if user_prompt:
 
     # Retrieve relevant knowledge
     context = get_relevant_knowledge(user_prompt, k=5)
+
+    with open('compliance.txt', 'r', encoding='utf-8') as f:
+        system_prompt = f.read().strip()
+
+
     # Prepend context to prompt
-    full_prompt = f"Knowledge:\n{context}\n\nUser: {user_prompt}" if context else user_prompt
+    full_prompt = f"""
+    {system_prompt}
+
+    배경 지식 및 관련규정:
+    {context}
+    
+    사용자 입력 메세지:
+    {user_prompt}
+    """ 
+    
     # Add user message to chat history
     msg = {
         "role": "user",
