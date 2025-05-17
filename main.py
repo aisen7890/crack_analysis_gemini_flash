@@ -61,8 +61,13 @@ st.set_page_config(
 )
 
 CONVERSATION_HISTORY_PATH = Path("./conversation_history.json")
-CHROMA_PATH = Path("./chroma_db").resolve()
-
+# Use a temporary directory for ChromaDB in cloud environment
+if os.environ.get('STREAMLIT_SERVER_RUNNING', False):
+    # Running on Streamlit Cloud
+    CHROMA_PATH = Path(tempfile.mkdtemp())
+else:
+    # Running locally
+    CHROMA_PATH = Path("./chroma_db").resolve()
 # ChromaDB and RAG functions
 client = None
 
