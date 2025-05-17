@@ -332,6 +332,8 @@ if user_prompt:
         st.session_state.save_to_reports = True
     elif re.search(r"save to report", user_prompt, re.IGNORECASE):
         st.session_state.save_to_reports = True
+    elif re.search(r"저장해", user_prompt, re.IGNORECASE):
+        st.session_state.save_to_reports = True
 
     # Retrieve relevant knowledge
     context = get_relevant_knowledge(user_prompt, k=5)
