@@ -348,13 +348,13 @@ st.sidebar.header("📂 Saved Reports")
 report_files = sorted(REPORTS_DIR.iterdir())
 if report_files:
     for file in report_files:
-        with open(file, "rb") as f:
-            st.sidebar.download_button(
-                label=f"Download {file.name}",
-                data=f,
-                file_name=file.name,
-                mime="application/octet-stream",
-            )
+        file_bytes = file.read_bytes()     # Path 객체에서 바로 바이트 읽기
+        st.sidebar.download_button(
+            label=f"Download {file.name}",
+            data=file_bytes,                # ← 바이트 직접 전달
+            file_name=file.name,
+            mime="application/octet-stream",
+        )
 else:
     st.sidebar.info("No reports available.")
 
