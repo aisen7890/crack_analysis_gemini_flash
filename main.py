@@ -319,13 +319,13 @@ st.sidebar.info(f"Total docs in KB: {count}")
 
 # Clear KB with confirmation
 st.sidebar.markdown("---")
-if st.sidebar.button("Clear Knowledge Base", type="secondary"):
+if st.sidebar.button("Clear DB", type="secondary"):
     col = initialize_db()
     ids = col.get(ids=None)["ids"]
     if ids:
         col.delete(ids=ids)
+    st.sidebar.success("Cleared")
     st.rerun()
-    st.success("Cleared")
     
 
 
