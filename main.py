@@ -444,7 +444,7 @@ if user_prompt:
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
     st.session_state.chat_history.append(msg)
-    save_conversation_history(st.session_state.chat_history)
+    save_conversation_history()
     
     # Display user message
     with st.chat_message("user"):
@@ -474,7 +474,7 @@ if user_prompt:
                     "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 }
                 st.session_state.chat_history.append(msg)
-                save_conversation_history(st.session_state.chat_history)
+                save_conversation_history()
                 # If save_to_reports flag is set, save this response, image, and audio
                 if st.session_state.save_to_reports:
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
