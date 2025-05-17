@@ -337,7 +337,7 @@ else:
 
 # Clear KB with confirmation
 st.sidebar.markdown("---")
-if st.sidebar.button("Clear Knowledge Base", type='secondary'):
+if st.sidebar.button("Clear DB", type='secondary'):
     if st.sidebar.button("Confirm Clear", key='confirm_clear'):
         clear_chromadb()
 
