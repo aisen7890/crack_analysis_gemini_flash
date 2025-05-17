@@ -7,4 +7,10 @@ pdfminer.six>=20231228
 gTTS>=2.5.1
 audio-recorder-streamlit>=0.1.6
 openai-whisper>=20231117
-sentence-transformers>=2.5.1 
+sentence-transformers>=2.5.1
+
+# PyTorch + CUDA11.8
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.6.0+cu118
+torchvision==0.21.0+cu118
+torchaudio==2.6.0+cu118
