@@ -21,16 +21,22 @@ from audio_recorder_streamlit import audio_recorder
 import whisper
 import uuid
 
-# Load environment variables
-load_dotenv()
+
 
 # Configure the Gemini API
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    st.error("❌ GOOGLE_API_KEY 환경변수가 설정되어 있지 않습니다.")
+if "GOOGLE_API_KEY" in st.secrets:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+else:
+    from dotenv import load_dotenv
+    load_dotenv()   # local only
+    import os
+    api_key = os.getenv("GOOGLE_API_KEY")
+
+if not api_key:
+    st.error("❌ GOOGLE_API_KEY가 설정되어 있지 않습니다.")
     st.stop()
 
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=api_key)
 
 # Initialize the model
 model = genai.GenerativeModel('gemini-1.5-flash')
