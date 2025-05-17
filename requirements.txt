@@ -1,0 +1,10 @@
+streamlit>=1.32.0
+google-generativeai>=0.3.2
+Pillow>=10.2.0
+python-dotenv>=1.0.1
+chromadb>=0.4.22
+pdfminer.six>=20231228
+gTTS>=2.5.1
+audio-recorder-streamlit>=0.1.6
+openai-whisper>=20231117
+sentence-transformers>=2.5.1 
