@@ -325,7 +325,7 @@ if st.sidebar.button("Clear DB", type="secondary"):
     if ids:
         col.delete(ids=ids)
     st.sidebar.success("Cleared")
-    ct = st.sidebar.info(f"Total docs in DB: {count}")
+    count = col.count()
     
 
 
