@@ -312,10 +312,8 @@ if st.sidebar.button("Add PDF"):
         st.sidebar.success(f"PDF '{pdf_file.name}' added.")
     else:
         st.sidebar.warning("Please select a PDF first.")
-
 col = initialize_db()
-count = col.count()
-ct = st.sidebar.info(f"Total docs in DB: {count}")
+
 
 # Clear DB with confirmation
 st.sidebar.markdown("---")
@@ -325,10 +323,10 @@ if st.sidebar.button("Clear DB", type="secondary"):
     if ids:
         col.delete(ids=ids)
     st.sidebar.success("Cleared")
-    count = col.count()
-    ct = st.sidebar.info(f"Total docs in DB: {count}")
 
 
+count = col.count()
+st.sidebar.info(f"Total docs in DB: {count}")
 
 
 # --- Modify chat input logic to use RAG ---
