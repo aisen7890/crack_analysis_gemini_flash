@@ -259,7 +259,8 @@ with col_chat:
     typed_prompt = st.chat_input("Enter text here")
 with col_audio:
     # Use Streamlit's built-in audio_input
-    audio_file = st.audio_input("🎤 Record your voice")
+    audio_file = st.audio_input("🎤 Record your voice", key=st.session_state.recorder_key)
+    
     if audio_file is not None:
         audio_bytes = audio_file.read()
     else:
