@@ -11,7 +11,7 @@ except ImportError:
     pass
 
 import streamlit as st
-import google.generativeai as genai
+import google.generativeai as old_genai
 from PIL import Image
 import io
 import base64
@@ -33,6 +33,8 @@ from gtts import gTTS
 import whisper
 import uuid
 
+from google import genai as new_genai
+import asyncio
 
 
 # Configure the Gemini API
@@ -50,10 +52,10 @@ if not api_key:
 
 
 
-genai.configure(api_key=api_key)
+old_genai.configure(api_key=api_key)
 
 # Initialize the model
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = old_genai.GenerativeModel('gemini-1.5-flash')
 
 # Set page config
 st.set_page_config(
