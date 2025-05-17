@@ -30,12 +30,6 @@ import gc
 import re
 from gtts import gTTS
 
-try:
-    from audio_recorder_streamlit import audio_recorder
-    _have_custom_recorder = True
-except ImportError:
-    _have_custom_recorder = False
-
 import whisper
 import uuid
 
@@ -264,20 +258,11 @@ col_chat, col_audio = st.columns([3, 1])
 with col_chat:
     typed_prompt = st.chat_input("Enter text here")
 with col_audio:
-    # Try the built-in widget first:
-    if hasattr(st, "audio_input"):
-        audio_bytes = st.audio_input("🎤 Record your voice")
-        # `.audio_input` returns a BytesIO-like object
-        if audio_bytes is not None:
-            audio_bytes = audio_bytes.read()
-
-    # Fallback to the custom component if somehow still available:
-    elif _have_custom_recorder:
-        audio_bytes = audio_recorder(
-            text="", pause_threshold=60.0, key=st.session_state.recorder_key
-        )
+    # Use Streamlit's built-in audio_input
+    audio_file = st.audio_input("🎤 Record your voice")
+    if audio_file is not None:
+        audio_bytes = audio_file.read()
     else:
-        st.warning("Audio input is not available in this environment.")
         audio_bytes = None
     
 # If audio is recorded, transcribe and use as prompt; else use typed prompt
