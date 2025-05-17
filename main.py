@@ -188,21 +188,6 @@ def autoplay_audio(audio_file_path):
     '''
     st.markdown(md, unsafe_allow_html=True)
 
-def clear_chromadb_documents():
-    try:
-        col = initialize_db()
-        # Get all IDs in the collection
-        all_ids = col.get(ids=None)["ids"]
-        if all_ids:
-            col.delete(ids=all_ids)
-            st.sidebar.success("All documents in the knowledge base have been deleted.")
-        else:
-            st.sidebar.info("No documents to delete.")
-        return True
-    except Exception as e:
-        st.sidebar.error(f"Error deleting documents from ChromaDB: {e}")
-        return False
-    
 # App title and description
 st.title("🤖 Analyze Concrete Crack using AI")
 st.markdown("""
