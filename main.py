@@ -25,7 +25,11 @@ import uuid
 load_dotenv()
 
 # Configure the Gemini API
-GOOGLE_API_KEY = "AIzaSyDvNnfQpBpu82ZObKgacoAEqubV_iiM_OU"
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    st.error("❌ GOOGLE_API_KEY 환경변수가 설정되어 있지 않습니다.")
+    st.stop()
+
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # Initialize the model
