@@ -11,7 +11,7 @@ google-generativeai>=0.3.2
 Pillow>=10.2.0
 chromadb>=0.4.22
 sentence-transformers>=2.5.1
-
+openai
 # PDF text extraction
 pdfminer.six>=20231228
 
