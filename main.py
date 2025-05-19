@@ -188,45 +188,26 @@ def transcribe_with_openai(audio_bytes: bytes) -> str:
     return resp.text
 
 def get_gemini_response(prompt, image=None):
-    try:
+    # 1) Build the chat‐history + current prompt
+    contents = []
+    for msg in st.session_state.chat_history:
+        role = "User" if msg["role"] == "user" else "Assistant"
+        contents.append({"text": f"{role}: {msg['content']}"})
+    contents.append({"text": f"User: {prompt}"})
 
-        # 1. 이전 대화 내역을 먼저 contents에 추가
-        contents = []
-        for msg in st.session_state.chat_history:
-            # 역할(role)과 내용을 구분하기 위해 "User: …", "Assistant: …" 형태로 삽입
-            role_prefix = "User" if msg["role"] == "user" else "Assistant"
-            contents.append({"text": f"{role_prefix}: {msg['content']}"})
-        
-        # 2. 현재 유저 질문 추가
-        contents.append({"text": f"User: {prompt}"})
+    # 2) Call Gemini—pass the PIL Image object directly (or None)
+    response = model.generate_content(
+        contents=contents,
+        image=image,
+        generation_config={
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 40,
+            "max_output_tokens": 2048,
+        }
+    )
 
-
-        if image:
-            img_buf = io.BytesIO()
-            image.save(img_buf, format="PNG")
-            img_data = base64.b64encode(img_buf.getvalue()).decode()
-            contents.append({
-                "inline_data": {
-                    "mime_type": "image/png",
-                    "data": img_data
-                }
-            })
-
-        # Generate response
-        response = model.generate_content(
-            contents=contents,
-            generation_config={
-                "temperature": 0.7,
-                "top_p": 0.8,
-                "top_k": 40,
-                "max_output_tokens": 2048,
-            }
-        )
-        
-        return response.text
-    except Exception as e:
-        st.error(f"Error: {str(e)}")
-        return None
+    return response.text
         
 
 def autoplay_audio(audio_file_path):
