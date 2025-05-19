@@ -180,10 +180,10 @@ def transcribe_with_openai(audio_bytes: bytes) -> str:
 
     # call Whisper endpoint
     with open(tmp_path, "rb") as audio_file:
-        resp = openai.Audio.transcribe(
+        resp = openai.Audio.transcriptions.create(
             model="whisper-1",
             file=audio_file
-        )
+            )
     os.unlink(tmp_path)
     return resp["text"]
 
