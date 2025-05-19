@@ -292,7 +292,7 @@ if audio_bytes:
         f.flush()
         f.close()
         audio_path = f.name
-    whisper_model = whisper.load_model("base")
+    whisper_model = whisper.load_model("base", device="cpu")
     result = whisper_model.transcribe(audio_path)
     transcript = result.get("text", "")
     st.session_state["last_voice_input"] = transcript
