@@ -335,12 +335,13 @@ for message in st.session_state.chat_history:
 st.sidebar.title("📚 Knowledge Base")
 st.sidebar.header("Upload & Stats")
 pdf_file = st.sidebar.file_uploader("Upload PDF to add", type=["pdf"], accept_multiple_files=True)
-if st.sidebar.button("Add PDF"):
-    if pdf_file:
-        add_pdf_to_db(pdf_file)
-        st.sidebar.success(f"PDF '{pdf_file.name}' added.")
+if st.sidebar.button("Add PDF(s)"):
+    if pdf_files:
+        for pdf in pdf_files:
+            add_pdf_to_db(pdf)     # ← here “pdf” is each UploadedFile
+            st.sidebar.success(f"Added '{pdf.name}'")
     else:
-        st.sidebar.warning("Please select a PDF first.")
+        st.sidebar.warning("Please select at least one PDF.")
 
 col = initialize_db()
 count = col.count()
