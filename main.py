@@ -94,12 +94,22 @@ def initialize_db():
     )
 
 def extract_text_from_pdf(pdf_file) -> str:
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(pdf_file.getvalue())
+    # Read all bytes from the UploadedFile
+    pdf_bytes = pdf_file.read()
+    # Rewind so Streamlit can still serve the file later if needed
+    pdf_file.seek(0)
+
+    # Write bytes out to a temp file for pdfminer
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(pdf_bytes)
         tmp_path = tmp.name
+
+    # Extract text and then delete temp
     text = extract_text(tmp_path)
     os.unlink(tmp_path)
+
     return text
+
 
 def split_into_chunks(text: str, chunk_size: int = 600):
     words = text.split()
