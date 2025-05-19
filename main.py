@@ -29,6 +29,7 @@ import tempfile
 import gc
 import re
 from gtts import gTTS
+import openai
 
 import whisper
 import uuid
@@ -37,6 +38,9 @@ import uuid
 # import asyncio
 
 from langdetect import detect
+api_key_openai = st.secrets["OPENAI_API_KEY"]
+
+openai.api_key = api_key_openai   # you already have this from st.secrets
 
 # Configure the Gemini API
 if "GOOGLE_API_KEY" in st.secrets:
@@ -167,7 +171,21 @@ if 'chat_history' not in st.session_state:
 # At the top, after session state initialization
 if 'save_to_reports' not in st.session_state:
     st.session_state.save_to_reports = False
+    
+def transcribe_with_openai(audio_bytes: bytes) -> str:
+    # write the BytesIO to a temp file
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        f.write(audio_bytes)
+        tmp_path = f.name
 
+    # call Whisper endpoint
+    with open(tmp_path, "rb") as audio_file:
+        resp = openai.Audio.transcribe(
+            model="whisper-1",
+            file=audio_file
+        )
+    os.unlink(tmp_path)
+    return resp["text"]
 
 def get_gemini_response(prompt, image=None):
     try:
@@ -287,14 +305,8 @@ with col_audio:
 user_prompt = None
 
 if audio_bytes:
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        f.write(audio_bytes)
-        f.flush()
-        f.close()
-        audio_path = f.name
-    whisper_model = whisper.load_model("base", device="cpu")
-    result = whisper_model.transcribe(audio_path)
-    transcript = result.get("text", "")
+    # audio_bytes is a raw wav from st.audio_input
+    transcript = transcribe_with_openai(audio_bytes)
     st.session_state["last_voice_input"] = transcript
 
     #erase audio data. 
