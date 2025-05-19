@@ -29,7 +29,6 @@ import tempfile
 import gc
 import re
 from gtts import gTTS
-from openai import OpenAI
 
 import whisper
 import uuid
@@ -38,9 +37,6 @@ import uuid
 # import asyncio
 
 from langdetect import detect
-api_key_openai = st.secrets["OPENAI_API_KEY"]
-client_openai = OpenAI(api_key=api_key_openai)
-
 
 # Configure the Gemini API
 if "GOOGLE_API_KEY" in st.secrets:
@@ -98,20 +94,11 @@ def initialize_db():
     )
 
 def extract_text_from_pdf(pdf_file) -> str:
-    # Read all bytes from the UploadedFile
-    pdf_bytes = pdf_file.read()
-    # Rewind so Streamlit can still serve the file later if needed
-    pdf_file.seek(0)
-
-    # Write bytes out to a temp file for pdfminer
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(pdf_bytes)
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(pdf_file.getvalue())
         tmp_path = tmp.name
-
-    # Extract text and then delete temp
     text = extract_text(tmp_path)
     os.unlink(tmp_path)
-
     return text
 
 def split_into_chunks(text: str, chunk_size: int = 600):
@@ -171,43 +158,48 @@ if 'chat_history' not in st.session_state:
 # At the top, after session state initialization
 if 'save_to_reports' not in st.session_state:
     st.session_state.save_to_reports = False
-    
-def transcribe_with_openai(audio_bytes: bytes) -> str:
-    # write the BytesIO to a temp file
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-        f.write(audio_bytes)
-        tmp_path = f.name
 
-    # call Whisper endpoint
-    with open(tmp_path, "rb") as audio_file:
-        resp = client_openai.audio.transcriptions.create(
-            model="gpt-4o-transcribe",
-            file=audio_file
-            )
-    os.unlink(tmp_path)
-    return resp.text
 
 def get_gemini_response(prompt, image=None):
-    # 1) Build the chat‐history + current prompt
-    contents = []
-    for msg in st.session_state.chat_history:
-        role = "User" if msg["role"] == "user" else "Assistant"
-        contents.append({"text": f"{role}: {msg['content']}"})
-    contents.append({"text": f"User: {prompt}"})
+    try:
 
-    # 2) Call Gemini—pass the PIL Image object directly (or None)
-    response = model.generate_content(
-        contents=contents,
-        image=image,
-        generation_config={
-            "temperature": 0.7,
-            "top_p": 0.8,
-            "top_k": 40,
-            "max_output_tokens": 2048,
-        }
-    )
+        # 1. 이전 대화 내역을 먼저 contents에 추가
+        contents = []
+        for msg in st.session_state.chat_history:
+            # 역할(role)과 내용을 구분하기 위해 "User: …", "Assistant: …" 형태로 삽입
+            role_prefix = "User" if msg["role"] == "user" else "Assistant"
+            contents.append({"text": f"{role_prefix}: {msg['content']}"})
+        
+        # 2. 현재 유저 질문 추가
+        contents.append({"text": f"User: {prompt}"})
 
-    return response.text
+
+        if image:
+            img_buf = io.BytesIO()
+            image.save(img_buf, format="PNG")
+            img_data = base64.b64encode(img_buf.getvalue()).decode()
+            contents.append({
+                "inline_data": {
+                    "mime_type": "image/png",
+                    "data": img_data
+                }
+            })
+
+        # Generate response
+        response = model.generate_content(
+            contents=contents,
+            generation_config={
+                "temperature": 0.7,
+                "top_p": 0.8,
+                "top_k": 40,
+                "max_output_tokens": 2048,
+            }
+        )
+        
+        return response.text
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        return None
         
 
 def autoplay_audio(audio_file_path):
@@ -286,11 +278,19 @@ with col_audio:
 user_prompt = None
 
 if audio_bytes:
-    # audio_bytes is a raw wav from st.audio_input
-    transcript = transcribe_with_openai(audio_bytes)
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        f.write(audio_bytes)
+        f.flush()
+        f.close()
+        audio_path = f.name
+    whisper_model = whisper.load_model("base")
+    result = whisper_model.transcribe(audio_path)
+    transcript = result.get("text", "")
     st.session_state["last_voice_input"] = transcript
 
-
+    #erase audio data. 
+    if os.path.exists(audio_path):
+        os.remove(audio_path)
     audio_bytes = None
 
 
@@ -324,19 +324,13 @@ for message in st.session_state.chat_history:
 # --- Sidebar: Knowledge Base Management ---
 st.sidebar.title("📚 Knowledge Base")
 st.sidebar.header("Upload & Stats")
-pdf_files = st.sidebar.file_uploader(
-    "Upload PDF(s) to add",
-    type=["pdf"],
-    accept_multiple_files=True
-)
-
-if st.sidebar.button("Add PDF(s)"):
-    if pdf_files:
-        for pdf in pdf_files:
-            add_pdf_to_db(pdf)     # ← here “pdf” is each UploadedFile
-            st.sidebar.success(f"Added '{pdf.name}'")
+pdf_file = st.sidebar.file_uploader("Upload PDF to add", type=["pdf"])
+if st.sidebar.button("Add PDF"):
+    if pdf_file:
+        add_pdf_to_db(pdf_file)
+        st.sidebar.success(f"PDF '{pdf_file.name}' added.")
     else:
-        st.sidebar.warning("Please select at least one PDF.")
+        st.sidebar.warning("Please select a PDF first.")
 
 col = initialize_db()
 count = col.count()
