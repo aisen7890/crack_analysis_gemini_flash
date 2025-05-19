@@ -521,8 +521,3 @@ except:
 
 st.session_state["pending_image"] = None
 
-
-
-
-
-
