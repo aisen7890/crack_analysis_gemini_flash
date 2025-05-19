@@ -309,9 +309,7 @@ if audio_bytes:
     transcript = transcribe_with_openai(audio_bytes)
     st.session_state["last_voice_input"] = transcript
 
-    #erase audio data. 
-    if os.path.exists(audio_path):
-        os.remove(audio_path)
+
     audio_bytes = None
 
 
