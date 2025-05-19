@@ -41,7 +41,6 @@ from langdetect import detect
 api_key_openai = st.secrets["OPENAI_API_KEY"]
 client = OpenAI(api_key=api_key_openai)
 
-openai.api_key = api_key_openai   # you already have this from st.secrets
 
 # Configure the Gemini API
 if "GOOGLE_API_KEY" in st.secrets:
@@ -181,12 +180,12 @@ def transcribe_with_openai(audio_bytes: bytes) -> str:
 
     # call Whisper endpoint
     with open(tmp_path, "rb") as audio_file:
-        resp = openai.Audio.transcriptions.create(
-            model="whisper-1",
+        resp = client.audio.transcriptions.create(
+            model="gpt-4o-transcribe",
             file=audio_file
             )
     os.unlink(tmp_path)
-    return resp["text"]
+    return resp.text
 
 def get_gemini_response(prompt, image=None):
     try:
