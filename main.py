@@ -94,11 +94,20 @@ def initialize_db():
     )
 
 def extract_text_from_pdf(pdf_file) -> str:
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(pdf_file.getvalue())
+    # Read all bytes from the UploadedFile
+    pdf_bytes = pdf_file.read()
+    # Rewind so Streamlit can still serve the file later if needed
+    pdf_file.seek(0)
+
+    # Write bytes out to a temp file for pdfminer
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        tmp.write(pdf_bytes)
         tmp_path = tmp.name
+
+    # Extract text and then delete temp
     text = extract_text(tmp_path)
     os.unlink(tmp_path)
+
     return text
 
 def split_into_chunks(text: str, chunk_size: int = 600):
@@ -324,13 +333,19 @@ for message in st.session_state.chat_history:
 # --- Sidebar: Knowledge Base Management ---
 st.sidebar.title("📚 Knowledge Base")
 st.sidebar.header("Upload & Stats")
-pdf_file = st.sidebar.file_uploader("Upload PDF to add", type=["pdf"], accept_multiple_files=True)
-if st.sidebar.button("Add PDF"):
-    if pdf_file:
-        add_pdf_to_db(pdf_file)
-        st.sidebar.success(f"PDF '{pdf_file.name}' added.")
+pdf_files = st.sidebar.file_uploader(
+    "Upload PDF(s) to add",
+    type=["pdf"],
+    accept_multiple_files=True
+)
+
+if st.sidebar.button("Add PDF(s)"):
+    if pdf_files:
+        for pdf in pdf_files:
+            add_pdf_to_db(pdf)     # ← here “pdf” is each UploadedFile
+            st.sidebar.success(f"Added '{pdf.name}'")
     else:
-        st.sidebar.warning("Please select a PDF first.")
+        st.sidebar.warning("Please select at least one PDF.")
 
 col = initialize_db()
 count = col.count()
