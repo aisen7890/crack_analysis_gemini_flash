@@ -29,7 +29,7 @@ import tempfile
 import gc
 import re
 from gtts import gTTS
-import openai
+from openai import OpenAI
 
 import whisper
 import uuid
@@ -39,6 +39,7 @@ import uuid
 
 from langdetect import detect
 api_key_openai = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key=api_key_openai)
 
 openai.api_key = api_key_openai   # you already have this from st.secrets
 
